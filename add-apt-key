@@ -15,11 +15,12 @@ usage() {
 [[ "$1" =~ ^/ ]] && echo "Error: You must provide a KEY_ID before specifying a source list file." && usage && exit 1
 
 KEY_ID="$1"
+KEYSERVER="hkps://keyserver.ubuntu.com"
 KEYRING_DIR="/etc/apt/keyrings"
 KEYRING_PATH="$KEYRING_DIR/$KEY_ID.gpg"
 mkdir -p "$KEYRING_DIR"
 
-gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$KEY_ID"
+gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --keyserver "$KEYSERVER" --recv-keys "$KEY_ID"
 gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --export > "$KEYRING_PATH"
 chmod 644 "$KEYRING_PATH"
 rm -f /tmp/temp-keyring.gpg

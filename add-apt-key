@@ -12,7 +12,7 @@ usage() {
 
 [ -z "$1" ] && usage && exit 1
 # If only a file path is provided
-[[ "$1" =~ ^/ ]] && echo "Error: You must provide a KEY_ID before specifying a source list file." && usage && exit 1
+[[ "$1" =~ / ]] && echo "Error: You must provide a KEY_ID before specifying a source list file." && usage && exit 1
 
 KEY_ID="$1"
 KEYSERVER="hkps://keyserver.ubuntu.com"
@@ -20,12 +20,13 @@ KEYRING_DIR="/etc/apt/keyrings"
 KEYRING_PATH="$KEYRING_DIR/$KEY_ID.gpg"
 mkdir -p "$KEYRING_DIR"
 
-gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --keyserver "$KEYSERVER" --recv-keys "$KEY_ID"
-gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --export > "$KEYRING_PATH"
-chmod 644 "$KEYRING_PATH"
+gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --keyserver $KEYSERVER --recv-keys "$KEY_ID" &&
+gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --export > "$KEYRING_PATH" &&
+chmod 644 "$KEYRING_PATH" &&
+echo "Key $KEY_ID has been successfully saved to $KEYRING_PATH" || echo "$KEY_ID hasn't been saved. Something went wrong"
+
 rm -f /tmp/temp-keyring.gpg
 
-echo "Key $KEY_ID has been successfully saved to $KEYRING_PATH"
 
 # Update .list file if provided
 if [ -n "$2" ]; then

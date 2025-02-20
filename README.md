@@ -4,7 +4,7 @@ I got tired of not being able to use `apt-key adv --recv-key` the old fashioned 
 
 So, something like this:
 ```
-wget https://raw.githubusercontent.com/MagoBuono/add-apt-key/refs/heads/main/add-apt-key -O /usr/local/bin
-chmod +x /usr/local/bin
+wget https://raw.githubusercontent.com/MagoBuono/add-apt-key/refs/heads/main/add-apt-key -O /usr/local/bin/add-apt-key
+chmod +x /usr/local/bin/add-apt-key
 ```
 to use it.

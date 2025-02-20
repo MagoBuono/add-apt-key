@@ -5,8 +5,8 @@ usage() {
     echo "  $me <KEY_ID> [source_list_path]"
     echo ""
     echo "Examples:"
-    echo "  $me 7FCC7D46ACCC4CF8                                      # Import key only"
-    echo "  $me 7FCC7D46ACCC4CF8 /etc/apt/sources.list.d/myrepo.list  # Import key and update source list"
+    echo "  $me 7FDC7D56ACCB4CF8                                      # Import key only"
+    echo "  $me 7FDC7D56ACCB4CF8 /etc/apt/sources.list.d/myrepo.list  # Import key and update source list"
     exit 1
 }
 

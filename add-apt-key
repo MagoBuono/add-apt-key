@@ -1,0 +1,55 @@
+#!/bin/bash
+usage() {
+    me=$(basename "$0")
+    echo "Usage:"
+    echo "  $me <KEY_ID> [source_list_path]"
+    echo ""
+    echo "Examples:"
+    echo "  $me 7FCC7D46ACCC4CF8                                      # Import key only"
+    echo "  $me 7FCC7D46ACCC4CF8 /etc/apt/sources.list.d/myrepo.list  # Import key and update source list"
+    exit 1
+}
+
+[ -z "$1" ] && usage && exit 1
+# If only a file path is provided
+[[ "$1" =~ ^/ ]] && echo "Error: You must provide a KEY_ID before specifying a source list file." && usage && exit 1
+
+KEY_ID="$1"
+KEYRING_DIR="/etc/apt/keyrings"
+KEYRING_PATH="$KEYRING_DIR/$KEY_ID.gpg"
+mkdir -p "$KEYRING_DIR"
+
+gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$KEY_ID"
+gpg --no-default-keyring --keyring gnupg-ring:/tmp/temp-keyring.gpg --export > "$KEYRING_PATH"
+chmod 644 "$KEYRING_PATH"
+rm -f /tmp/temp-keyring.gpg
+
+echo "Key $KEY_ID has been successfully saved to $KEYRING_PATH"
+
+# Update .list file if provided
+if [ -n "$2" ]; then
+    SOURCE_LIST_PATH="$2"
+
+    # Do nothing if file doesn't exist
+    if [ ! -f "$SOURCE_LIST_PATH" ]; then
+        echo "Error: The file $SOURCE_LIST_PATH does not exist."
+        exit 1
+    fi
+
+    # do nothing if already contains signed-by
+    if grep -q "signed-by=$KEYRING_PATH" "$SOURCE_LIST_PATH"; then
+        echo "The source list already contains signed-by for this key."
+    else
+        # if already has options
+        sed -i -E \
+            "/^(deb|deb-src) \[[^]]+\] / s|(deb(-src)? \[)|\1signed-by=$KEYRING_PATH |" \
+            "$SOURCE_LIST_PATH"
+
+        # if has no options
+        sed -i -E \
+            "/^(deb|deb-src) http/ s|(deb(-src)?) (http)|\1 [signed-by=$KEYRING_PATH] \3|" \
+            "$SOURCE_LIST_PATH"
+
+        echo "Updated $SOURCE_LIST_PATH to include signed-by=$KEYRING_PATH"
+    fi
+fi
